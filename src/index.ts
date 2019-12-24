@@ -1,4 +1,4 @@
-'use strict'
+"use strict";
 
 import "reflect-metadata";
 import {Container} from "typedi";
@@ -14,8 +14,8 @@ import * as workers from "./workers";
 
 import {Api} from "./api";
 
-const cli = new CommandLineApp(
-    "new-web-application",
+export const cli = new CommandLineApp(
+    "ddns-aliyun",
     "0.0.1",
     [],
     () => new Api(
@@ -31,3 +31,6 @@ const cli = new CommandLineApp(
 );
 
 cli.run();
+
+export * from "./const";
+

@@ -1,3 +1,4 @@
+import {IDNSTarget} from "./const";
 
 export const defaultConf = {
     "name": "ddns-aliyun",
@@ -7,5 +8,18 @@ export const defaultConf = {
         "log_prod_console": "info"
     },
     "drivers": {},
-    "rules": {}
-}
+    "rules": {
+        "authority": {
+            "accessKeyId": "_FILL_THIS",
+            "accessKeySecret": "_FILL_THIS",
+        },
+        "targets": [
+            {
+                "DomainName": "_YOUR_DOMAIN_NAME.com",
+                "RR": "*",
+                "Type": "A"
+            }
+        ],
+        "timeSpanMs": 60000,
+    },
+};

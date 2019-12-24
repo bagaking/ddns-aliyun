@@ -37,18 +37,25 @@ export class DDNSWorker extends Worker implements IWorker {
         while (true) {
             this.log.info(`⊙ worker ${this.name} round ${round} started `);
 
+            let ipPublic = await getExternalIP();
+            if (!ipPublic) {
+                this.log.error("get external ip failed");
+                await forMs(2000);
+                continue;
+            }
+
             this.processRunning += 1;
+
             try {
-                for (let indTarget in targets){
+                for (let indTarget in targets) {
                     let target: IDNSTarget = targets[indTarget];
-                    let result = await this.ddnsService.addDomainRecord(target);
+                    let result = await this.ddnsService.addDomainRecord(target, ipPublic);
                     this.log.info(`update target ${
-                        JSON.stringify(Object.values(target))} ${
+                        JSON.stringify(Object.values(target))} to ip ${ipPublic} ${
                         result ? "success" : "failed"}: ${
                         result ? JSON.stringify(result) : "null"
                         }`);
                 }
-                // todo: do something here
             }
             catch (e) {
                 this.log.error(`⊙ proc of worker ${this.name} error: ${e}, ${e.stack} `);
@@ -61,7 +68,6 @@ export class DDNSWorker extends Worker implements IWorker {
             await forMs(turtle.rules<IDNSConfig>().timeSpanMs || 60000);
         }
     }
-
 
 
 }
