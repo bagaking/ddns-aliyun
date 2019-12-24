@@ -23,10 +23,30 @@ export class DnsService {
         });
     }
 
-    public async addDomainRecord(target: IDNSTarget, ip: string) {
+    public async find(DomainName: string, RRKeyWord: string) {
+        let result = await this.client.request<any>("DescribeDomainRecords", {
+            Action: "DescribeDomainRecords",
+            DomainName,
+            RRKeyWord
+        }, {method: "POST"});
+        return result.DomainRecords.Record[0] as IDNSTarget & { Value: string, RecordId: string } || null;
+    }
+
+    public async update(RR: string, RecordId: string, Type: string, Value: string) {
+        let result = await this.client.request("UpdateDomainRecord", {
+            Action: "UpdateDomainRecord",
+            RR,
+            RecordId,
+            Type,
+            Value
+        }, {method: "POST"});
+        return result;
+    }
+
+    public async addDomainRecord(target: IDNSTarget, Value: string) {
         let result = await this.client.request("AddDomainRecord", {
             ... target,
-            Value: ip
+            Value
         }, {method: "POST"});
         return result;
     }

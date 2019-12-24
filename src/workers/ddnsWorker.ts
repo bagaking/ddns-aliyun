@@ -49,12 +49,29 @@ export class DDNSWorker extends Worker implements IWorker {
             try {
                 for (let indTarget in targets) {
                     let target: IDNSTarget = targets[indTarget];
-                    let result = await this.ddnsService.addDomainRecord(target, ipPublic);
-                    this.log.info(`update target ${
-                        JSON.stringify(Object.values(target))} to ip ${ipPublic} ${
+                    let targetStr = JSON.stringify(Object.values(target));
+
+                    let search = await this.ddnsService.find(target.DomainName, target.RR);
+
+                    if (search && search.Value === ipPublic && search.Type === target.Type) {
+                        this.log.info(
+                            `value of target ${targetStr} is ${search.Value}, which equal to the public ip. nothing changed`);
+                        continue;
+                    }
+
+                    let result: any;
+                    if (search) {
+                        this.log.info(
+                            `target ${targetStr} are created, but its setting are not match. try set ${search.Value} => ${ipPublic}, ${search.Type} => ${target.Type}`);
+                        result = await this.ddnsService.update(target.RR, search.RecordId, target.Type, ipPublic);
+                    } else {
+                        this.log.info(
+                            `target ${targetStr} are not created, try create it with ip ${ipPublic}`);
+                        result = await this.ddnsService.addDomainRecord(target, ipPublic);
+                    }
+                    this.log.info(`update target ${targetStr} to ip ${ipPublic} ${
                         result ? "success" : "failed"}: ${
-                        result ? JSON.stringify(result) : "null"
-                        }`);
+                        result ? JSON.stringify(result) : "null"}`);
                 }
             }
             catch (e) {
